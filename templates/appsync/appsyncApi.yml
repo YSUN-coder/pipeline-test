@@ -11,6 +11,15 @@ Parameters:
 
 
 Resources:
+
+  MyQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName:
+        Fn::Join:
+        - ''
+        - - SampleQueue-
+          - Ref: AWS::StackName
   AppSyncApi:
     Type: AWS::AppSync::GraphQLApi
     Properties:
@@ -110,6 +119,9 @@ Resources:
 
 
 Outputs:
+  MyQueueARN:
+    Value:
+      Ref: MyQueue
   GraphQLApiEndpoint:
     Description: The URL of the GraphQL Endpoint
     Value: !GetAtt AppSyncApi.GraphQLUrl
