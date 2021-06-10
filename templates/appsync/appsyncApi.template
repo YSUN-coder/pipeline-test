@@ -1,0 +1,118 @@
+Description: AppSync API
+
+Parameters:
+  APIName:
+    Type: String
+    Description: Name of the API - used to generate unique names for resources
+    MinLength: 3
+    MaxLength: 20
+    AllowedPattern: '^[a-zA-Z][a-zA-Z0-9_]*$'
+
+
+
+Resources:
+  AppSyncApi:
+    Type: AWS::AppSync::GraphQLApi
+    Properties:
+      AuthenticationType: "AWS_IAM"
+      Name: !Sub ${APIName}
+
+
+
+  AppSyncSchema:
+    Type: AWS::AppSync::GraphQLSchema
+    Properties:
+      ApiId: !GetAtt AppSyncApi.ApiId
+      Definition: |
+        schema {
+          query: Query
+        }
+
+        type Quote {
+          message: String!
+          sentAt: String!
+        }
+
+        type Query {
+          hello(message: String!): Quote!
+        }
+
+
+
+  AppSyncHelloDataSource:
+    Type: AWS::AppSync::DataSource
+    Properties:
+      ApiId: !GetAtt AppSyncApi.ApiId
+      Name: !Sub ${APIName}_local
+      Description: "Only local AppSync Data Source"
+      Type: NONE
+
+
+
+  AppSyncHelloQueryResolver:
+    Type: AWS::AppSync::Resolver
+    DependsOn: AppSyncSchema
+    Properties:
+      ApiId: !GetAtt AppSyncApi.ApiId
+      TypeName: Query
+      FieldName: hello
+      DataSourceName: !GetAtt AppSyncHelloDataSource.Name
+
+      RequestMappingTemplate: |
+        {
+          "version": "2017-02-28",
+          "payload": {
+            "message": $util.toJson("API reply to username ${context.identity.username} who said, ${context.arguments.message}"),
+          }
+        }
+      ResponseMappingTemplate: $util.toJson($context.result)
+
+
+
+  AppSyncMessageQuoteResolver:
+    Type: "AWS::AppSync::Resolver"
+    DependsOn: AppSyncSchema
+    Properties:
+      ApiId: !GetAtt AppSyncApi.ApiId
+      TypeName: Quote
+      FieldName: message
+      DataSourceName: !GetAtt AppSyncHelloDataSource.Name
+      RequestMappingTemplate: |
+        {
+
+          "version": "2017-02-28",
+
+          "payload": $util.toJson($context.source.message)
+
+        }
+      ResponseMappingTemplate: "$util.toJson($context.result)"
+
+
+
+  AppSyncSendAtQuoteResolver:
+    Type: "AWS::AppSync::Resolver"
+    DependsOn: AppSyncSchema
+    Properties:
+      ApiId: !GetAtt AppSyncApi.ApiId
+      TypeName: Quote
+      FieldName: sentAt
+      DataSourceName: !GetAtt AppSyncHelloDataSource.Name
+      RequestMappingTemplate: |
+        {
+
+          "version": "2017-02-28",
+
+          "payload": "$util.time.nowISO8601()"
+
+        }
+      ResponseMappingTemplate: "$util.toJson($context.result)"
+
+
+
+Outputs:
+  GraphQLApiEndpoint:
+    Description: The URL of the GraphQL Endpoint
+    Value: !GetAtt AppSyncApi.GraphQLUrl
+  GraphQLApiId:
+    Description: The API ID of the GraphQL API
+    Value: !GetAtt AppSyncApi.ApiId

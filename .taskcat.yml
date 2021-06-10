@@ -1,0 +1,10 @@
+project:
+  name: test-appsync-automation-project
+  regions:
+    - ca-central-1
+tests:
+  appsync-test:
+    parameters:
+      APIName: "simpleAPI"
+      AvailabilityZones: "ca-central-1"
+    template: ./templates/appsync/appsyncApi.template
