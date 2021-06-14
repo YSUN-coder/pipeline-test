@@ -5,15 +5,15 @@ Parameters:
   GitHubUser:
     Type: String
     Description: GitHub User
-    Default: "newfarms"
+    Default: "YSUN-coder"
   GitHubRepo:
     Type: String
     Description: GitHub Repo to pull from. Only the Name. not the URL
-    Default: "appsync-automation"
+    Default: "pipeline-test"
   GitHubBranch:
     Type: String
     Description: GitHub Branch
-    Default: "feature-AppSyncAuto-review-sylvia"
+    Default: "main"
   GitHubToken:
     NoEcho: true
     Type: String
@@ -76,8 +76,12 @@ Resources:
             - arn:aws:s3:::codepipeline*
             Effect: Allow
           - Action:
+            - logs:*
+            - lambda:*
+            - cloudwatch:*
             - codebuild:*
             - s3:*
+            - ec2:*
             - iam:PassRole
             Resource: "*"
             Effect: Allow
@@ -99,13 +103,26 @@ Resources:
         PolicyDocument:
           Statement:
           - Action:
+            - apigateway:*
             - cloudformation:*
+            - cloudwatch:*
+            - cloudtrail:*
             - codebuild:*
             - codecommit:*
             - codepipeline:*
+            - config:*
+            - dynamodb:*
+            - ec2:*
             - iam:*
+            - kms:*
+            - lambda:*
+            - logs:*
+            - redshift:*
+            - rds:*
             - secretsmanager:*
             - s3:*
+            - sns:*
+            - sqs:*
             Effect: Allow
             Resource: "*"
           Version: '2012-10-17'

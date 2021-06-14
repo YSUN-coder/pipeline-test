@@ -6,5 +6,5 @@ tests:
   appsync-test:
     parameters:
       APIName: "simpleAPI"
-      AvailabilityZones: "ca-central-1"
+      AvailabilityZones: '$[taskcat_genaz_1]'
     template: ./templates/appsync/appsyncApi.template
